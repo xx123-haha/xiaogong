@@ -1,4 +1,4 @@
-package com.xiaogong.thread;
+package com.xiaogong.thread.couthdownlatch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
