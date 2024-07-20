@@ -27,6 +27,8 @@
         <!-- 次要依赖 -->
         <hutool-version>5.8.20</hutool-version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
     </properties>
 
     <dependencyManagement>
