@@ -1,5 +1,7 @@
 package com.xiaogong.demo02;
 
+import org.junit.Test;
+
 import java.util.concurrent.atomic.LongAdder;
 
 /**
@@ -29,9 +31,17 @@ public class LongAdderTest {
         @Override
         public void run() {
             for (int i = 0; i < 100000; i++) {
-                //累加并返回
+                // 累加并返回
                 longAdder.increment();
             }
         }
+    }
+
+    @Test
+    public void test() {
+        String str = "123_abd";
+        String[] s = str.split("_");
+        System.out.println(s[0]);
+        System.out.println(s[1]);
     }
 }

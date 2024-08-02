@@ -27,9 +27,7 @@ public class HashMapTest {
 
         Hashtable<Object, Object> objectObjectHashtable = new Hashtable<>();
 
-        // stringStream.reduce()
-
-        synchronized (hashMap){
+        synchronized (hashMap) {
             System.out.println("111");
         }
         ConcurrentHashMap<Object, Object> concurrentHashMap = new ConcurrentHashMap<>();
