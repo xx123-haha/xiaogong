@@ -1,12 +1,12 @@
 ip:
-  47.96.41.135
+  121.37.189.240
 
 spring:
   rabbitmq:
     host: ${ip}
-    port: 5672
-    username: xiongke
-    password: xiongke
+    port: 5674
+    username: xiaogong
+    password: 1225zjzj
     virtual-host: /xk
     listener:
       simple:
