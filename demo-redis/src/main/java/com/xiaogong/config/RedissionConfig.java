@@ -18,14 +18,14 @@ public class RedissionConfig {
     @Value("${spring.data.redis.port}")
     private String port;
 
-    // @Value("${spring.data.redis.password}")
-    // private String password;
+    @Value("${spring.data.redis.password}")
+    private String password;
 
     @Bean
     public RedissonClient getRedisson() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://" + host + ":" + port);
-        // config.useSingleServer().setAddress("redis://" + host + ":" + port).setPassword(password);
+        // config.useSingleServer().setAddress("redis://" + host + ":" + port);
+        config.useSingleServer().setAddress("redis://" + host + ":" + port).setPassword(password);
         return Redisson.create(config);
     }
 }

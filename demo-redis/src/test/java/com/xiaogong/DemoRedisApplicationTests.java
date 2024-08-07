@@ -1,16 +1,20 @@
 package com.xiaogong;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import com.xiaogong.configuration.SlidingWindowRateLimiter;
 import com.xiaogong.utils.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.util.ObjectUtils;
 
@@ -20,6 +24,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 
 @Slf4j
 @SpringBootTest
@@ -36,6 +42,9 @@ class DemoRedisApplicationTests {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private SlidingWindowRateLimiter slidingWindowRateLimiter;
 
     @Test
     public void printCode() {
@@ -94,8 +103,6 @@ class DemoRedisApplicationTests {
     public void test11(){
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         executorService.submit(this::testRedisson);
-
-
     }
 
 
@@ -142,7 +149,6 @@ class DemoRedisApplicationTests {
             for (Future future : jobResults) {
                 future.get();
             }
-
             //清空数据
             list.clear();
             partitionList.clear();
@@ -152,6 +158,59 @@ class DemoRedisApplicationTests {
             lock.unlock();
             System.out.println("定时清理过期积分任务执行完毕");
         }
+    }
+
+    @Test
+    public void testBloomFilter(){
+        RBloomFilter<String> xiaogong = redissonClient.getBloomFilter("xiaogong");
+        if (!xiaogong.isExists()){
+            xiaogong.tryInit(10000L,0.01);
+        }
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        String initStr = "xiongke";
+        for (int i = 0; i < 100; i++) {
+            int finalI = i;
+            executorService.submit(()->xiaogong.add(initStr + finalI));
+        }
+        executorService.shutdown();
+
+        try {
+            executorService.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testBloomFilter2(){
+        RBloomFilter<String> xiaogong = redissonClient.getBloomFilter("xiaogong");
+        boolean res = xiaogong.add("xiongkeabc");
+        System.out.println(res);
+    }
+
+    @Test
+    public void rateLimiterTest(){
+        Boolean acquire = slidingWindowRateLimiter.tryAcquire("18230615417", 1, 60);
+        System.out.println(acquire);
+        if (acquire){
+            String code = RandomUtil.randomNumbers(6);
+            System.out.printf("验证码 ---->>> %s%n",code);
+            stringRedisTemplate.opsForValue().set("captcha:"+"18230615417",code,5, TimeUnit.MINUTES);
+        }
+    }
+
+    @Test
+    public void hsetTest(){
+        String key = "xiaogong_zset";
+        stringRedisTemplate.opsForZSet().add(key,"xiongke1",100+1-System.currentTimeMillis()/Math.pow(10,13));
+        stringRedisTemplate.opsForZSet().add(key,"xiongke2",99);
+        stringRedisTemplate.opsForZSet().add(key,"xiongke3",98);
+        stringRedisTemplate.opsForZSet().add(key,"xiongke4",98);
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet().rangeWithScores(key, 0, 10);
+        typedTuples.forEach(typedTuple -> {
+            System.out.println(typedTuple.getValue()+"----"+typedTuple.getScore());
+        });
     }
 
 }

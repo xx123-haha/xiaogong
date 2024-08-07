@@ -1,5 +1,6 @@
 package com.xiaogong;
 
+import com.google.common.base.CaseFormat;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -38,5 +39,13 @@ class DemoAggregateApplicationTests {
      * MySQL函数索引 mysql8之后的索引优化技术 函数索引不是直接在表的列上创建的，而是基于列的某个表达式创建的
      *
      */
+
+    @Test
+    public void testEnum(){
+        String name = PayChannel.ALIPAY.name();
+        System.out.println(name);
+        String res = CaseFormat.UPPER_UNDERSCORE.converterTo(CaseFormat.LOWER_CAMEL).convert(name) + "PayChannelService";
+        System.out.println("------------->>>"+res);
+    }
 
 }

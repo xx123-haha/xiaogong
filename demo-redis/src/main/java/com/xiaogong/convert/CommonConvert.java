@@ -1,4 +1,4 @@
-package com.xiaogong;
+package com.xiaogong.convert;
 
 import com.xiaogong.service.modle.SendSMS;
 import org.mapstruct.Mapper;
