@@ -8,6 +8,8 @@ public enum RedisKeyEnum {
     //订单流水号 rediskey；按租户隔离  有效期暂不使用， 该流水号 订单、退款单、退货单共用
     ORDER_GENERATE_NUMBER("order:generatenumber:{0}",24*60),
 
+    PRODUCT_STOCK("product:stock:%s",24),
+
     ;
 
 

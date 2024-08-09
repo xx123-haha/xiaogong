@@ -4,6 +4,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.xiaogong.configuration.SlidingWindowRateLimiter;
+import com.xiaogong.enums.RedisKeyEnum;
 import com.xiaogong.utils.ThreadPoolUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,12 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.util.ObjectUtils;
 
 import java.text.MessageFormat;
@@ -211,6 +214,24 @@ class DemoRedisApplicationTests {
         typedTuples.forEach(typedTuple -> {
             System.out.println(typedTuple.getValue()+"----"+typedTuple.getScore());
         });
+    }
+
+    @Test
+    public void hashTest(){
+        String key = String.format(RedisKeyEnum.PRODUCT_STOCK.getKey(), "1001");
+        stringRedisTemplate.opsForHash().put(key,"spu1","100");
+        stringRedisTemplate.opsForHash().put(key,"spu2","100");
+        stringRedisTemplate.opsForHash().put(key,"spu3","100");
+        stringRedisTemplate.expire(key,RedisKeyEnum.PRODUCT_STOCK.getExpires(), TimeUnit.HOURS);
+    }
+    @Test
+    public void stockReduceTest(){
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource("lua/stockDecr.lua")));
+        redisScript.setResultType(Long.class);
+        String key = String.format(RedisKeyEnum.PRODUCT_STOCK.getKey(), "1001");
+        Long result = stringRedisTemplate.execute(redisScript, Arrays.asList(key,"spu2"), "1");
+        System.out.println("result: --------->>>"+result);
     }
 
 }
