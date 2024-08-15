@@ -24,9 +24,9 @@ public class 剩余银饰的重量 {
         //     weights.add(scanner.nextInt());
         // }
 
-        weights.add(1);
-        weights.add(1);
-        weights.add(2);
+        weights.add(6);
+        weights.add(10);
+        weights.add(20);
         // 计算熔化后剩余的银饰重量
         int result = meltSilver(weights);
 
